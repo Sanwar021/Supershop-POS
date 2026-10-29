@@ -1,0 +1,319 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { getLanguage, setLanguage, t } from '../../lib/i18n';
+import { cacheBootstrapData, syncOutbox } from '../../offline/sync';
+import {
+  ShoppingBag,
+  ShoppingCart,
+  Truck,
+  LayoutGrid,
+  LayoutDashboard,
+  ShieldCheck,
+  LogOut,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  Globe,
+  ChevronDown,
+  Menu,
+  X,
+  Clock,
+  User as UserIcon,
+  Store,
+  Building2,
+  MapPin,
+} from 'lucide-react';
+
+export const Navbar: React.FC = () => {
+  const { user, restaurant, branches, activeBranch, setActiveBranch, logout } = useAuth();
+  const location = useLocation();
+  const [lang, setLangState] = useState(getLanguage());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'online' | 'offline' | 'syncing'>(
+    navigator.onLine ? 'online' : 'offline'
+  );
+  const [syncMessage, setSyncMessage] = useState<string>('Connection is healthy');
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleSync = (e: any) => {
+      setSyncStatus(e.detail);
+    };
+    const handleOnline = () => {
+      setSyncStatus('online');
+      setSyncMessage('Connection restored');
+    };
+    const handleOffline = () => {
+      setSyncStatus('offline');
+      setSyncMessage('No internet connection');
+    };
+    const handleLang = () => setLangState(getLanguage());
+
+    window.addEventListener('sync_status', handleSync);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('languagechange', handleLang);
+
+    return () => {
+      window.removeEventListener('sync_status', handleSync);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('languagechange', handleLang);
+    };
+  }, []);
+
+  const toggleLanguage = () => {
+    const next = lang === 'en' ? 'bn' : 'en';
+    setLanguage(next);
+  };
+
+  const handleManualSync = async () => {
+    if (!navigator.onLine) {
+      setSyncStatus('offline');
+      setSyncMessage('Connect to the internet and try again');
+      return;
+    }
+    setSyncStatus('syncing');
+    setSyncMessage('Syncing pending changes...');
+    const result = await syncOutbox();
+    await cacheBootstrapData(activeBranch?.id);
+    setSyncStatus('online');
+    setSyncMessage(
+      result.failed > 0
+        ? `${result.failed} change${result.failed === 1 ? '' : 's'} could not sync`
+        : result.synced > 0
+        ? `${result.synced} change${result.synced === 1 ? '' : 's'} synced`
+        : 'Everything is up to date'
+    );
+  };
+
+  const navItems = [
+    { path: '/pos', label: t('pos'), icon: ShoppingCart, roles: ['owner', 'manager', 'cashier', 'delivery_staff', 'super_admin'] },
+    { path: '/fulfillment', label: t('fulfillment'), icon: Truck, roles: ['owner', 'manager', 'delivery_staff', 'cashier', 'super_admin'] },
+    { path: '/registers', label: t('registers'), icon: LayoutGrid, roles: ['owner', 'manager', 'cashier', 'super_admin'] },
+    { path: '/admin', label: t('admin'), icon: LayoutDashboard, roles: ['owner', 'manager', 'inventory_manager', 'purchase_manager', 'accountant', 'super_admin'] },
+  ];
+
+  if (user?.role === 'super_admin') {
+    navItems.push({ path: '/platform', label: t('platform'), icon: ShieldCheck, roles: ['super_admin'] });
+  }
+
+  const roleLabel = (role?: string) => {
+    switch (role) {
+      case 'owner': return 'Owner';
+      case 'manager': return 'Branch Manager';
+      case 'cashier': return 'Cashier';
+      case 'inventory_manager': return 'Inventory Head';
+      case 'purchase_manager': return 'Purchase Officer';
+      case 'accountant': return 'Accountant';
+      case 'delivery_staff': return 'Delivery Staff';
+      case 'super_admin': return 'Super Admin';
+      default: return role || 'Staff';
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-40 bg-white border-b border-[#E3E6E8] text-[#2E3138] shadow-sm select-none">
+      <div className="storefront-promo-bar">
+        <div className="max-w-[1680px] mx-auto h-11 px-4 flex items-center justify-center gap-3">
+          <div className="hidden sm:flex w-8 h-8 rounded-lg border border-white/50 items-center justify-center"><ShoppingBag className="w-4 h-4" /></div>
+          <Link to="/register?type=partner" className="promo-outline-button" aria-label="Create a supermarket partner account">
+            <Store className="w-3.5 h-3.5" /> Sign up to be a supermarket partner
+          </Link>
+          <Link to="/register?type=business" className="promo-outline-button" aria-label="Create a business account">
+            <Building2 className="w-3.5 h-3.5" /> Sign up for a business account
+          </Link>
+        </div>
+      </div>
+      <div className="max-w-[1680px] mx-auto px-3 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-2 sm:gap-4">
+        {/* Brand & Branch */}
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <Link to="/pos" className="flex items-center gap-2.5 font-bold tracking-tight text-[#0F172A] group shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-[#E21B70] flex items-center justify-center text-white font-black shadow-md shadow-[#E21B70]/25 group-hover:scale-105 transition-transform">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-[#E21B70] leading-tight">
+                NovaMart
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Branch Switcher */}
+          {branches.length > 0 && (
+            <div className="relative group hidden sm:block">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#CBD5E1] text-xs font-bold text-[#334155] transition-colors">
+                <span className="truncate max-w-[140px]">{activeBranch?.name || 'Select Outlet'}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
+              </button>
+              {branches.length > 1 && (
+                <div className="absolute top-full left-0 mt-1 w-56 py-1 bg-white border border-[#CBD5E1] rounded-xl shadow-xl hidden group-hover:block z-50">
+                  {branches.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => setActiveBranch(b)}
+                      className={`w-full text-left px-3.5 py-2 text-xs transition-colors flex items-center justify-between ${
+                        activeBranch?.id === b.id ? 'bg-[#E6F4EA] text-[#0D5C3A] font-bold' : 'text-[#334155] hover:bg-[#F1F5F9]'
+                      }`}
+                    >
+                      <span className="truncate">{b.name}</span>
+                      {activeBranch?.id === b.id && <span className="w-2 h-2 rounded-full bg-[#0D5C3A] shrink-0"></span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="hidden xl:flex items-center gap-4 text-sm text-[#2E3138] font-medium">
+            <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> New address · Select your address</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4" /> Time · Standard</span>
+          </div>
+        </div>
+
+        {/* Desktop Navigation Tabs */}
+        <nav className="hidden">
+          {navItems.filter((item) => !user || item.roles.includes(user.role)).map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname.startsWith(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  isActive
+                    ? 'bg-[#FFF0F6] text-[#E21B70]'
+                    : 'text-[#64748B] hover:text-[#E21B70] hover:bg-[#FFF0F6]'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right Actions: Shift Indicator, Sync, Language, User, Logout */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Shift status */}
+          <Link
+            to="/login"
+            className="hidden md:inline-flex items-center justify-center min-h-[40px] px-5 py-2 rounded-lg border border-[#2E3138] text-xs font-bold hover:bg-[#F7F7F7] focus-visible:ring-2 focus-visible:ring-[#E21B70]"
+          >
+            Log in
+          </Link>
+          <Link
+            to="/pos?delivery=signup"
+            className="hidden xl:inline-flex items-center justify-center min-h-[40px] px-5 py-2 rounded-lg bg-[#E21B70] hover:bg-[#C91661] text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#E21B70] focus-visible:ring-offset-2"
+          >
+            Sign up for free delivery
+          </Link>
+
+          {/* Sync status */}
+          <button
+            data-navbar-sync
+            type="button"
+            onClick={handleManualSync}
+            title={`${syncMessage}. Click to sync now.`}
+            aria-label={`${syncStatus}. ${syncMessage}. Sync now`}
+            aria-live="polite"
+            disabled={syncStatus === 'syncing'}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold border shrink-0 ${
+              syncStatus === 'online'
+                ? 'bg-[#E6F4EA] text-[#0D5C3A] border-[#B7E1CD]'
+                : syncStatus === 'syncing'
+                ? 'bg-amber-100 text-amber-800 border-amber-300'
+                : 'bg-rose-100 text-rose-800 border-rose-300'
+            } disabled:cursor-wait focus-visible:ring-2 focus-visible:ring-[#E21B70] focus-visible:ring-offset-2`}
+          >
+            {syncStatus === 'online' ? (
+              <>
+                <Wifi className="w-3 h-3 text-[#0D5C3A]" />
+                <span className="hidden sm:inline">Online</span>
+              </>
+            ) : syncStatus === 'syncing' ? (
+              <>
+                <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                <span className="hidden sm:inline">Syncing</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-3 h-3 text-rose-600" />
+                <span className="hidden sm:inline">Offline</span>
+              </>
+            )}
+          </button>
+
+          {/* Language Toggle */}
+          <button
+            data-navbar-language
+            onClick={toggleLanguage}
+            title="Toggle English / বাংলা"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] border border-[#CBD5E1] text-xs font-bold text-[#334155] transition-colors"
+          >
+            <Globe className="w-3.5 h-3.5 text-[#0D5C3A]" />
+            <span>{lang === 'en' ? 'বাংলা' : 'EN'}</span>
+          </button>
+
+          {/* User profile info */}
+          <div className="hidden">
+            <div className="w-8 h-8 rounded-full bg-[#E6F4EA] border border-[#B7E1CD] flex items-center justify-center text-[#0D5C3A] font-bold text-xs">
+              {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold text-[#0F172A] truncate max-w-[120px] leading-tight">
+                {user?.name || 'Cashier'}
+              </span>
+              <span className="text-[10px] text-[#0D5C3A] font-semibold">
+                {roleLabel(user?.role)}
+              </span>
+            </div>
+          </div>
+
+          {/* Logout Button */}
+          <button
+            data-navbar-logout
+            onClick={logout}
+            title={t('logout')}
+            className="p-2 rounded-xl text-[#64748B] hover:text-[#DC2626] hover:bg-[#FEE2E2] transition-colors"
+          >
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          {/* Mobile hamburger menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-xl text-[#0F172A] hover:bg-[#F1F5F9] transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-[#E2E8F0] bg-white px-4 py-3 space-y-2">
+          {navItems.filter((item) => !user || item.roles.includes(user.role)).map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname.startsWith(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  isActive ? 'bg-[#0D5C3A] text-white shadow-sm' : 'text-[#64748B] hover:bg-[#F1F5F9]'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </header>
+  );
+};

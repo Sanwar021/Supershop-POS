@@ -1,0 +1,10 @@
+{
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "css.lint.unknownAtRules": "ignore",
+  "css.validate": true,
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  }
+}
+

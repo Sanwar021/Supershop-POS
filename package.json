@@ -1,0 +1,15 @@
+{
+  "name": "pos-supershop",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "start:backend": "cd backend && go run ./cmd/api",
+    "test:e2e": "powershell -ExecutionPolicy Bypass -File .\\test_e2e.ps1"
+  }
+}
+

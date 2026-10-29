@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: restoflow-db
+    environment:
+      POSTGRES_USER: restoflow
+      POSTGRES_PASSWORD: restoflow_secret
+      POSTGRES_DB: restoflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/0001_init.up.sql:/docker-entrypoint-initdb.d/0001_init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restoflow -d restoflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: restoflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: restoflow-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: production
+      HTTP_PORT: 8080
+      DATABASE_URL: postgres://restoflow:restoflow_secret@postgres:5432/restoflow?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      JWT_ACCESS_SECRET: restoflow_super_secure_jwt_access_secret_2026_xyz
+      JWT_REFRESH_SECRET: restoflow_super_secure_jwt_refresh_secret_2026_xyz
+      ACCESS_TTL: 15m
+      REFRESH_TTL: 720h
+      CORS_ORIGINS: "*"
+      DEFAULT_CURRENCY: BDT
+      DEFAULT_TIMEZONE: Asia/Dhaka
+      TRIAL_DAYS: 14
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: restoflow-web
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:

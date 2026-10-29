@@ -1,0 +1,371 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hind Siliguri', sans-serif;
+    --color-brand-primary: #e21b70;
+    --color-brand-hover: #c91661;
+    --color-brand-soft: #fff0f6;
+    --color-text-primary: #2e3138;
+    --color-text-secondary: #6b7175;
+    --color-surface: #ffffff;
+    --color-background: #f7f7f7;
+    --color-border: #e3e6e8;
+    --novamart-emerald: #e21b70;
+    --novamart-emerald-dark: #a11350;
+    --novamart-emerald-light: #fff0f6;
+    --novamart-accent: #e21b70;
+    --novamart-amber: #d97706;
+    --novamart-surface: #ffffff;
+    --novamart-bg: #f7f7f7;
+    --novamart-border: #e3e6e8;
+  }
+
+  html {
+    @apply h-full overflow-x-hidden;
+    max-width: 100%;
+  }
+
+  body {
+    @apply bg-[#F7F7F7] text-[#2E3138] antialiased font-sans min-h-screen w-full overflow-x-hidden selection:bg-[#E21B70] selection:text-white;
+    -webkit-tap-highlight-color: transparent;
+    max-width: 100%;
+  }
+
+  #root {
+    @apply min-h-screen flex flex-col w-full overflow-x-hidden bg-[#F7F7F7];
+  }
+
+  /* Prevent automatic iOS zoom while preserving desktop font sizes */
+  @media (max-width: 640px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid #e21b70;
+    outline-offset: 2px;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+img, video { height: auto; }
+
+button, input, select, textarea { max-width: 100%; }
+
+.app-content-height { height: calc(100dvh - 116px); }
+
+.login-page {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(226, 27, 112, .18), transparent 26rem),
+    linear-gradient(135deg, #06131e 0%, #0b1d29 46%, #121019 100%);
+}
+
+.login-art-panel {
+  isolation: isolate;
+  background-image:
+    linear-gradient(180deg, rgba(2, 12, 22, .12) 0%, rgba(2, 12, 22, .24) 48%, rgba(2, 10, 18, .66) 100%),
+    url('/images/novamart-login-graffiti-v2.png');
+  background-size: cover;
+  background-position: 59% center;
+}
+
+.login-art-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(1, 10, 18, .24), transparent 55%);
+}
+
+.login-art-title span { color: #ff8fbd; }
+.login-form-panel { box-shadow: inset 0 0 0 1px rgba(176, 167, 151, .25); }
+
+@media (max-width: 1023px) {
+  .login-page {
+    background-image:
+      linear-gradient(rgba(4, 15, 24, .84), rgba(4, 15, 24, .88)),
+      url('/images/novamart-login-graffiti-v2.png');
+    background-size: cover;
+    background-position: center;
+  }
+  .login-shell { min-height: auto; max-width: 540px; border-width: 5px; }
+  .login-form-panel { min-height: calc(100dvh - 32px); }
+}
+
+@media (max-width: 479px) {
+  .login-page { padding: 0; }
+  .login-shell { border: 0; border-radius: 0; min-height: 100dvh; }
+  .login-form-panel { padding: 14px; min-height: 100dvh; }
+  .login-form-card { padding: 22px 18px; border-radius: 20px; }
+}
+
+/* Keep data-heavy back-office tables contained by their scroll regions. */
+.overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  .storefront-promo-bar .max-w-\[1680px\] { padding-inline: 8px; gap: 6px; }
+  .promo-outline-button { min-width: 0; flex: 1; justify-content: center; white-space: normal; line-height: 1.15; }
+  [data-navbar-sync], [data-navbar-language], [data-navbar-logout] { display: none !important; }
+
+  button, [role="button"], a { touch-action: manipulation; }
+  input, select, textarea { font-size: 16px !important; }
+
+  [class*="fixed inset-0"] {
+    padding: 8px !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  [class*="fixed inset-0"] > [class*="bg-white"] {
+    max-width: 100%;
+    max-height: calc(100dvh - 16px);
+  }
+}
+
+@media (max-width: 380px) {
+  .promo-outline-button { font-size: 7px; padding-inline: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+.pos-shell {
+  background: #f7f7f7;
+}
+
+.pos-menu-panel,
+.pos-cart-panel {
+  box-shadow: 0 14px 45px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.storefront-hero {
+  position: relative;
+  min-height: 272px;
+  background-image: linear-gradient(90deg, rgba(0,0,0,.04), transparent 35%, rgba(0,0,0,.08)), url('/images/novamart-grocery-hero.png');
+  background-size: cover;
+  background-position: center 47%;
+  box-shadow: none;
+}
+
+.catalogue-search {
+  position: absolute;
+  z-index: 20;
+  width: 310px;
+  right: 24px;
+  top: 224px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.catalogue-search input {
+  height: 48px;
+  border-radius: 9999px !important;
+  background: #fff !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+  line-height: 22px;
+  caret-color: #e21b70;
+}
+
+.catalogue-search input:focus {
+  outline: none !important;
+  border-color: #2e3138 !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.14) !important;
+}
+
+.product-shelf .product-card:nth-child(n+9) { display: none; }
+.product-card:hover { transform: none; box-shadow: none; }
+.product-card, .product-card * { min-width: 0; }
+.product-card img { width: 100%; height: 100%; }
+
+@media (max-width: 479px) {
+  .product-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .product-card h3 { font-size: 11px; line-height: 1.35; }
+}
+
+.storefront-hero::after { display: none; }
+
+
+.storefront-promo-bar { background: #e21b70; color: #fff; }
+.promo-outline-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.promo-outline-button:hover { background: #fff; color: #e21b70; }
+
+.hero-service-chip {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 118px;
+  padding: .6rem .7rem;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: .8rem;
+  background: rgba(255,255,255,.1);
+  backdrop-filter: blur(10px);
+}
+
+.hero-service-chip span { display: flex; flex-direction: column; min-width: 0; }
+.hero-service-chip b { font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-service-chip small { font-size: 8px; color: rgba(255,255,255,.72); margin-top: 2px; }
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: rgba(0, 0, 0, 0.16) 0 0 24px 0;
+}
+
+.category-rail-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  padding: .58rem .7rem;
+  border-radius: .65rem;
+  color: #526071;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: left;
+  transition: all .18s ease;
+}
+
+.category-rail-item > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-rail-item > span:last-child {
+  color: #94a3b8;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.category-rail-item:hover { background: #fff0f6; color: #e21b70; }
+.category-rail-item.active { background: #fff0f6; color: #e21b70; font-weight: 900; }
+.category-rail-item.active > span:last-child { color: #e21b70; }
+
+/* Foodpanda-derived retail colour system. These rules intentionally remap the
+   legacy NovaMart emerald utility classes across the full POS surface. */
+[class*="bg-[#0D5C3A]"] { background-color: #e21b70 !important; }
+[class*="bg-[#083D26]"] { background-color: #a11350 !important; }
+[class*="bg-[#E6F4EA]"] { background-color: #fff0f6 !important; }
+[class*="bg-[#D1EADB]"] { background-color: #ffebf3 !important; }
+[class*="text-[#0D5C3A]"] { color: #e21b70 !important; }
+[class*="text-[#083D26]"] { color: #a11350 !important; }
+[class*="border-[#B7E1CD]"] { border-color: #fad9e7 !important; }
+[class*="border-[#0D5C3A]"] { border-color: #e21b70 !important; }
+[class*="ring-[#0D5C3A]"] { --tw-ring-color: rgba(226, 27, 112, .22) !important; }
+[class*="shadow-[#0D5C3A]"] { --tw-shadow-color: rgba(226, 27, 112, .22) !important; }
+[class*="hover:bg-[#0D5C3A]"]:hover { background-color: #e21b70 !important; }
+[class*="hover:text-[#0D5C3A]"]:hover { color: #e21b70 !important; }
+[class*="focus:ring-[#0D5C3A]"]:focus { --tw-ring-color: #e21b70 !important; }
+
+button, a, input, select { transition-duration: 200ms; transition-timing-function: cubic-bezier(.22,.1,.1,1); }
+
+@media (max-width: 640px) {
+  .hero-service-chip { min-width: 0; flex: 1; }
+  .storefront-hero { min-height: 150px; background-position: center; }
+  .catalogue-search { position: static; width: auto; padding: 12px; background: #fff; }
+  .promo-outline-button { padding: 0 9px; font-size: 8px; }
+}
+
+.retail-display {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+
+/* Touch friendly minimum sizing */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Custom Scrollbar for Super Shop POS */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(13, 92, 58, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 92, 58, 0.5);
+}
+
+/* Barcode scanner flash feedback */
+@keyframes scanFlash {
+  0% { background-color: rgba(13, 92, 58, 0.2); }
+  100% { background-color: transparent; }
+}
+.scan-flash {
+  animation: scanFlash 0.4s ease-out;
+}
+
+/* Print Styles for 80mm Supermarket Thermal Receipt */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt, #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0;
+    padding: 2mm;
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+.receipt-scroll-area {
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 380px) {
+  .receipt-scroll-area { padding: 8px; }
+  #printable-receipt { font-size: 9px !important; }
+}

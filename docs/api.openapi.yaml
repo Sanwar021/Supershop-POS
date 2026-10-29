@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: RestoFlow POS API
+  description: Restaurant Billing, KOT, Inventory and Profit Automation Multi-tenant SaaS Platform API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Development Server
+paths:
+  /auth/register:
+    post:
+      summary: Register restaurant and owner (Starts 14-day trial)
+      responses:
+        '201':
+          description: Registration successful
+  /auth/login:
+    post:
+      summary: Email and password login
+      responses:
+        '200':
+          description: Access and refresh tokens returned
+  /auth/pin-login:
+    post:
+      summary: Quick PIN login on POS terminals
+      responses:
+        '200':
+          description: PIN authentication successful
+  /pos/bootstrap:
+    get:
+      summary: All-in-one bootstrap payload for POS client caching
+      parameters:
+        - name: branch_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Categories, items, variants, tables, settings returned
+  /orders:
+    post:
+      summary: Create new order (Client-generated UUID)
+      responses:
+        '201':
+          description: Order created
+    get:
+      summary: List orders with filters
+      responses:
+        '200':
+          description: Array of orders
+  /orders/{id}/send-kot:
+    post:
+      summary: Dispatch new items batch to kitchen
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: KOT created and broadcast to KDS
+  /orders/{id}/bill:
+    get:
+      summary: Get calculated bill breakdown
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subtotal, VAT, Service Charge, Round-off, Grand Total
+  /orders/{id}/pay:
+    post:
+      summary: Process split tender payment and finalize order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order paid, gap-free invoice generated, stock deducted
+  /kots:
+    get:
+      summary: List KDS active tickets
+      responses:
+        '200':
+          description: Active kitchen order tickets
+  /kots/items/{id}/status:
+    patch:
+      summary: Advance kitchen item status (pending -> preparing -> ready -> served)
+      responses:
+        '200':
+          description: Status updated
+  /shifts/open:
+    post:
+      summary: Open register shift
+      responses:
+        '201':
+          description: Shift opened
+  /shifts/{id}/close:
+    post:
+      summary: Close shift with cash reconciliation
+      responses:
+        '200':
+          description: Shift closed with variance
+  /reports/dashboard:
+    get:
+      summary: Executive KPI cards and sales metrics
+      responses:
+        '200':
+          description: Sales, Orders, Average Bill, Net Profit
+  /reports/profit-loss:
+    get:
+      summary: Real-time Profit and Loss statement
+      responses:
+        '200':
+          description: Revenue - COGS - Expenses = Net Profit
+  /sync/batch:
+    post:
+      summary: Replay offline mutations outbox with idempotency keys
+      responses:
+        '200':
+          description: Batch sync processed
